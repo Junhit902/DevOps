@@ -1,10 +1,10 @@
 # DevOps
 
 Alunos:
-César Almeida 222909 
-Gustavo Tamezava 222226
-Thiago Honma 222628
-Vinícius Araújo 211973
+César Almeida 222909\
+Gustavo Tamezava 222226\
+Thiago Honma 222628\
+Vinícius Araújo 211973\
 
 ## User Story escolhida para os testes e BDDs
 
