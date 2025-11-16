@@ -1,6 +1,6 @@
 package com.projeto.meuprojeto.usecase;
 
-import com.projeto.meuprojeto.domain.entity.Aluno;
+import com.projeto.meuprojeto.domain.entities.Aluno;
 
 public final class SolicitarDescontoUseCase {
 
