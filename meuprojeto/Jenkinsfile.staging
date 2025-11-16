@@ -1,0 +1,89 @@
+pipeline {
+    agent any
+
+    environment {
+        MAVEN_HOME = '/usr/share/maven'
+        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk'
+        PROJECT_NAME = 'meuprojeto'
+    }
+
+    options {
+        timestamps()
+        timeout(time: 30, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '10'))
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                echo 'Fazendo checkout do código...'
+                checkout scm
+            }
+        }
+
+        stage('Build') {
+            steps {
+                echo 'Compilando o projeto...'
+                sh 'mvn clean compile -DskipTests'
+            }
+        }
+
+        stage('Unit Tests') {
+            steps {
+                echo 'Executando testes unitários...'
+                sh 'mvn test'
+            }
+        }
+
+        stage('Code Analysis') {
+            steps {
+                echo 'Executando análise de código com PMD...'
+                sh 'mvn pmd:pmd pmd:cpd'
+            }
+        }
+
+        stage('Code Coverage') {
+            steps {
+                echo 'Gerando relatório de cobertura de código...'
+                sh 'mvn jacoco:report'
+            }
+        }
+
+        stage('Package') {
+            steps {
+                echo 'Empacotando a aplicação...'
+                sh 'mvn package -DskipTests'
+            }
+        }
+
+        stage('Deploy to Staging') {
+            when {
+                branch 'develop'
+            }
+            steps {
+                echo 'Fazendo deploy para o ambiente de staging...'
+                // Adicione aqui os comandos de deploy para staging
+                // Exemplo: sh './deploy-staging.sh'
+                echo 'Deploy para staging concluído com sucesso!'
+            }
+        }
+    }
+
+    post {
+        always {
+            echo 'Limpando workspace...'
+            cleanWs()
+        }
+        success {
+            echo 'Pipeline executado com sucesso!'
+            // Adicione aqui notificações de sucesso (email, Slack, etc)
+        }
+        failure {
+            echo 'Pipeline falhou!'
+            // Adicione aqui notificações de falha (email, Slack, etc)
+        }
+        unstable {
+            echo 'Pipeline executado com avisos!'
+        }
+    }
+}
