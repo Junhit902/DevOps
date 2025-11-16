@@ -1,44 +1,45 @@
-package com.projeto.meuprojeto.usecase;
+package com.projeto.meuprojeto.domain.valueobjects;
 
-import com.projeto.meuprojeto.domain.entities.Aluno;
+/**
+ * Value Object para representar a quantidade de cursos concluídos
+ */
+public class CursosConcluidos {
 
-public class SolicitarDescontoUseCase {
+    private static final int CURSOS_MINIMOS = 3;
+    private final int quantidade;
 
-    public static double solicitarDesconto(Aluno aluno) {
-
-        // Value Objects
-        int cursos = aluno.getCursosConcluidos().getQuantidade();
-        double media = aluno.getMedia().getValor(); // já já corrijo isso também
-
-        // Regras de desconto
-        if (!aluno.getCursosConcluidos().temCursosSuficientes()) {
-            return 0.0;
+    public CursosConcluidos(int quantidade) {
+        if (quantidade < 0) {
+            throw new IllegalArgumentException("Quantidade de cursos não pode ser negativa");
         }
-
-        if (media >= 8.0) {
-            return 0.40;
-        } else if (media >= 7.0) {
-            return 0.20;
-        }
-
-        return 0.0;
+        this.quantidade = quantidade;
     }
 
-    public static String solicitarDescontoComMensagem(Aluno aluno) {
+    public int getQuantidade() {
+        return quantidade;
+    }
 
-        int cursos = aluno.getCursosConcluidos().getQuantidade();
-        double media = aluno.getMedia().getValor(); // idem aqui
+    public boolean temCursosSuficientes() {
+        return quantidade >= CURSOS_MINIMOS;
+    }
 
-        if (!aluno.getCursosConcluidos().temCursosSuficientes()) {
-            return "Precisa completar pelo menos 3 cursos para ter direito ao desconto";
-        }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CursosConcluidos)) return false;
+        CursosConcluidos that = (CursosConcluidos) o;
+        return quantidade == that.quantidade;
+    }
 
-        if (media >= 8.0) {
-            return "Desconto aplicado: 40%";
-        } else if (media >= 7.0) {
-            return "Desconto aplicado: 20%";
-        }
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(quantidade);
+    }
 
-        return "Sem desconto";
+    @Override
+    public String toString() {
+        return "CursosConcluidos{" +
+                "quantidade=" + quantidade +
+                '}';
     }
 }

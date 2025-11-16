@@ -1,48 +1,54 @@
-package com.projeto.meuprojeto.usecase;
+package com.projeto.meuprojeto.domain.valueobjects;
 
-import com.projeto.meuprojeto.domain.entities.Aluno;
-import com.projeto.meuprojeto.domain.valueobjects.CursosConcluidos;
-import com.projeto.meuprojeto.domain.valueobjects.Media;
+/**
+ * Value Object para representar a média global de um aluno
+ */
+public class Media {
 
-public class SolicitarDescontoUseCase {
+    private static final double MEDIA_ALTA = 8.0;
+    private static final double MEDIA_MEDIA = 7.0;
+    private final double valor;
 
-    public static double solicitarDesconto(Aluno aluno) {
-
-        CursosConcluidos cursos = aluno.getCursosConcluidos();
-        Media media = aluno.getMedia();
-
-        if (!cursos.temCursosSuficientes()) {
-            return 0.0;
+    public Media(double valor) {
+        if (valor < 0.0 || valor > 10.0) {
+            throw new IllegalArgumentException("Média deve estar entre 0.0 e 10.0");
         }
-
-        if (media.ehAlta()) {
-            return 0.40;
-        }
-
-        if (media.ehMedia()) {
-            return 0.20;
-        }
-
-        return 0.0;
+        this.valor = valor;
     }
 
-    public static String solicitarDescontoComMensagem(Aluno aluno) {
+    public double getValor() {
+        return valor;
+    }
 
-        CursosConcluidos cursos = aluno.getCursosConcluidos();
-        Media media = aluno.getMedia();
+    public boolean ehAlta() {
+        return valor >= MEDIA_ALTA;
+    }
 
-        if (!cursos.temCursosSuficientes()) {
-            return "Precisa completar pelo menos 3 cursos para ter direito ao desconto";
-        }
+    public boolean ehMedia() {
+        return valor >= MEDIA_MEDIA && valor < MEDIA_ALTA;
+    }
 
-        if (media.ehAlta()) {
-            return "Desconto aplicado: 40%";
-        }
+    public boolean ehBaixa() {
+        return valor < MEDIA_MEDIA;
+    }
 
-        if (media.ehMedia()) {
-            return "Desconto aplicado: 20%";
-        }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Media)) return false;
+        Media media = (Media) o;
+        return Double.compare(media.valor, valor) == 0;
+    }
 
-        return "Sem desconto";
+    @Override
+    public int hashCode() {
+        return Double.hashCode(valor);
+    }
+
+    @Override
+    public String toString() {
+        return "Media{" +
+                "valor=" + valor +
+                '}';
     }
 }
