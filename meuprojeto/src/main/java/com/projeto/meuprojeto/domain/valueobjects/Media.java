@@ -1,50 +1,48 @@
-package com.projeto.meuprojeto.domain.valueobjects;
+package com.projeto.meuprojeto.usecase;
 
-/**
- * Value Object para representar a média global do aluno
- */
-public class Media {
+import com.projeto.meuprojeto.domain.entities.Aluno;
+import com.projeto.meuprojeto.domain.valueobjects.CursosConcluidos;
+import com.projeto.meuprojeto.domain.valueobjects.Media;
 
-    private final double valor;
+public class SolicitarDescontoUseCase {
 
-    public Media(double valor) {
-        if (valor < 0.0 || valor > 10.0) {
-            throw new IllegalArgumentException("Média deve estar entre 0.0 e 10.0");
+    public static double solicitarDesconto(Aluno aluno) {
+
+        CursosConcluidos cursos = aluno.getCursosConcluidos();
+        Media media = aluno.getMedia();
+
+        if (!cursos.temCursosSuficientes()) {
+            return 0.0;
         }
-        this.valor = valor;
+
+        if (media.ehAlta()) {
+            return 0.40;
+        }
+
+        if (media.ehMedia()) {
+            return 0.20;
+        }
+
+        return 0.0;
     }
 
-    public double getValor() {
-        return valor;
-    }
+    public static String solicitarDescontoComMensagem(Aluno aluno) {
 
-    public boolean ehAlta() {
-        return valor >= 8.0;
-    }
+        CursosConcluidos cursos = aluno.getCursosConcluidos();
+        Media media = aluno.getMedia();
 
-    public boolean ehMedia() {
-        return valor >= 7.0 && valor < 8.0;
-    }
+        if (!cursos.temCursosSuficientes()) {
+            return "Precisa completar pelo menos 3 cursos para ter direito ao desconto";
+        }
 
-    public boolean ehBaixa() {
-        return valor < 7.0;
-    }
+        if (media.ehAlta()) {
+            return "Desconto aplicado: 40%";
+        }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Media)) return false;
-        Media media = (Media) o;
-        return Double.compare(media.valor, valor) == 0;
-    }
+        if (media.ehMedia()) {
+            return "Desconto aplicado: 20%";
+        }
 
-    @Override
-    public int hashCode() {
-        return Double.hashCode(valor);
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%.2f", valor);
+        return "Sem desconto";
     }
 }
