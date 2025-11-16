@@ -1,8 +1,8 @@
 package com.projeto.meuprojeto;
 
 import com.projeto.meuprojeto.adapter.DadosAlunos;
-import com.projeto.meuprojeto.domain.entity.Aluno;
-import com.projeto.meuprojeto.usecase.SolicitarDescontoUseCase;
+import com.projeto.meuprojeto.domain.entities.Aluno;
+import com.projeto.meuprojeto.application.usecases.SolicitarDescontoUseCase;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
