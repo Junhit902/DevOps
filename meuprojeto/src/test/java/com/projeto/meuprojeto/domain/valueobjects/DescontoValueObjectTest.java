@@ -2,6 +2,9 @@ package com.projeto.meuprojeto.domain.valueobjects;
 
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class DescontoValueObjectTest {
@@ -39,18 +42,16 @@ class DescontoValueObjectTest {
     }
 
     @Test
-    void construtorDeveValidarPercentual() {
-        assertThrows(IllegalArgumentException.class, () -> {
-            // acesso via reflexão para testar validação de percentual inválido
-            java.lang.reflect.Constructor<Desconto> ctor = Desconto.class.getDeclaredConstructor(double.class, String.class);
-            ctor.setAccessible(true);
-            ctor.newInstance(-0.1, "-10%");
-        });
+    void construtorDeveValidarPercentual() throws NoSuchMethodException {
+        Constructor<Desconto> ctor = Desconto.class.getDeclaredConstructor(double.class, String.class);
+        ctor.setAccessible(true);
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            java.lang.reflect.Constructor<Desconto> ctor = Desconto.class.getDeclaredConstructor(double.class, String.class);
-            ctor.setAccessible(true);
-            ctor.newInstance(1.1, "110%");
-        });
+        InvocationTargetException ex1 = assertThrows(InvocationTargetException.class, () -> ctor.newInstance(-0.1, "-10%"));
+        assertTrue(ex1.getCause() instanceof IllegalArgumentException);
+        assertEquals("Percentual deve estar entre 0.0 e 1.0", ex1.getCause().getMessage());
+
+        InvocationTargetException ex2 = assertThrows(InvocationTargetException.class, () -> ctor.newInstance(1.1, "110%"));
+        assertTrue(ex2.getCause() instanceof IllegalArgumentException);
+        assertEquals("Percentual deve estar entre 0.0 e 1.0", ex2.getCause().getMessage());
     }
 }

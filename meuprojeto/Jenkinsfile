@@ -1,0 +1,65 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'Maven-3'
+    }
+
+    options {
+        timestamps()
+    }
+
+    stages {
+        stage('Pre-Build') {
+            steps {
+                echo 'Limpando workspace e fazendo checkout do código...'
+                deleteDir()
+                checkout scm
+            }
+        }
+
+        stage('Build & Tests (Quality Gate 70%)') {
+            steps {
+                dir('meuprojeto') {
+                    echo 'Executando mvn clean verify (testes + Jacoco + PMD)...'
+                    bat 'mvn clean verify'
+                }
+            }
+            post {
+                always {
+                    junit 'meuprojeto/target/surefire-reports/*.xml'
+                    archiveArtifacts artifacts: 'meuprojeto/target/site/**', fingerprint: true
+                }
+            }
+        }
+
+        stage('Quality Gate Summary') {
+            when {
+                expression { currentBuild.currentResult == 'SUCCESS' }
+            }
+            steps {
+                echo 'Build SUCCESS: Quality Gate de cobertura >= 70% atendido.'
+                echo 'Relatórios disponíveis em meuprojeto/target/site/jacoco e meuprojeto/target/site/pmd.html.'
+            }
+        }
+
+        stage('Trigger Docker Image') {
+            when {
+                expression { currentBuild.currentResult == 'SUCCESS' }
+            }
+            steps {
+                echo 'Disparando pipeline Image_Docker pois Quality Gate foi atingido.'
+                build job: 'Image_Docker', wait: false
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo 'Pipeline falhou. Verificar testes JUnit, cobertura Jacoco (<70%) ou violações graves.'
+        }
+        always {
+            echo 'Pipeline Pipeline-DEV-Test finalizado.'
+        }
+    }
+}
