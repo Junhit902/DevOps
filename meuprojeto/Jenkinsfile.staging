@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        MAVEN_HOME = '/usr/share/maven'
+        MAVEN_HOME = '/usr/batare/maven'
         JAVA_HOME = '/usr/lib/jvm/java-17-openjdk'
         PROJECT_NAME = 'meuprojeto'
     }
@@ -24,35 +24,35 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Compilando o projeto...'
-                sh 'mvn clean compile -DskipTests'
+                bat 'mvn clean compile -DskipTests'
             }
         }
 
         stage('Unit Tests') {
             steps {
                 echo 'Executando testes unitários...'
-                sh 'mvn test'
+                bat 'mvn test'
             }
         }
 
         stage('Code Analysis') {
             steps {
                 echo 'Executando análise de código com PMD...'
-                sh 'mvn pmd:pmd pmd:cpd'
+                bat 'mvn pmd:pmd pmd:cpd'
             }
         }
 
         stage('Code Coverage') {
             steps {
                 echo 'Gerando relatório de cobertura de código...'
-                sh 'mvn jacoco:report'
+                bat 'mvn jacoco:report'
             }
         }
 
         stage('Package') {
             steps {
                 echo 'Empacotando a aplicação...'
-                sh 'mvn package -DskipTests'
+                bat 'mvn package -DskipTests'
             }
         }
 
@@ -63,7 +63,7 @@ pipeline {
             steps {
                 echo 'Fazendo deploy para o ambiente de staging...'
                 // Adicione aqui os comandos de deploy para staging
-                // Exemplo: sh './deploy-staging.sh'
+                // Exemplo: bat './deploy-staging.bat'
                 echo 'Deploy para staging concluído com sucesso!'
             }
         }
