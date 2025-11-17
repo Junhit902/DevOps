@@ -16,6 +16,7 @@ WORKDIR /app
 
 COPY --from=builder /build/target/meuprojeto-0.0.1-SNAPSHOT.jar app.jar
 
-EXPOSE 8686
+# A aplicação Spring Boot ficará disponível na porta 8080 dentro do container
+EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "app.jar"]

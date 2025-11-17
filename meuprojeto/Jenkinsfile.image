@@ -1,0 +1,59 @@
+pipeline {
+    agent any
+
+    environment {
+        // Ajuste o nome do repositório conforme seu usuário do Docker Hub
+        DOCKERHUB_REPO = 'thiagojun09/dev_ops_ac2'
+        IMAGE_TAG = 'latest'
+    }
+
+    stages {
+        stage('Pre-Build') {
+            steps {
+                echo 'Limpando workspace e fazendo checkout do código...'
+                deleteDir()
+                checkout scm
+            }
+        }
+
+        stage('Build Docker Image (sem testes)') {
+            steps {
+                dir('meuprojeto') {
+                    echo 'Construindo imagem Docker usando Dockerfile (build Maven interno com -DskipTests)...'
+                    bat 'docker build -t %DOCKERHUB_REPO%:%IMAGE_TAG% .'
+                }
+            }
+        }
+
+        stage('Login no Docker Hub') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-cred', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASS')]) {
+                    bat 'echo Fazendo login no Docker Hub...'
+                    bat 'echo %DOCKERHUB_PASS% | docker login -u %DOCKERHUB_USER% --password-stdin'
+                }
+            }
+        }
+
+        stage('Push para Docker Hub') {
+            steps {
+                bat 'docker push %DOCKERHUB_REPO%:%IMAGE_TAG%'
+            }
+        }
+
+        stage('Trigger Pipeline_Staging') {
+            steps {
+                echo 'Disparando Pipeline_Staging...'
+                build job: 'Pipeline_Staging', wait: false
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline Image_Docker concluído com sucesso. Imagem publicada no Docker Hub.'
+        }
+        failure {
+            echo 'Pipeline Image_Docker falhou. Verifique logs de docker build/login/push.'
+        }
+    }
+}
