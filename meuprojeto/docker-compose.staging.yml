@@ -4,21 +4,17 @@ services:
   meuprojeto:
     build:
       context: .
-      dockerfile: Dockerfile.staging
+      dockerfile: Dockerfile
     container_name: meuprojeto-staging
     ports:
-      - "8080:8080"
+      - "8686:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=staging
-      - LOG_LEVEL=INFO
-    networks:
-      - app-network
+      - SPRING_APPLICATION_NAME=meuprojeto
+    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 10s
-      timeout: 5s
+      interval: 30s
+      timeout: 10s
       retries: 3
-
-networks:
-  app-network:
-    driver: bridge
+      start_period: 40s
