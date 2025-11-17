@@ -20,32 +20,32 @@ pipeline {
         stage('Build') {
             steps {
                 echo "Compilando o projeto..."
-                bat '"%MAVEN_HOME%\\bin\\mvn.cmd" clean compile -DskipTests'
+                bat "cd meuprojeto && \"${MAVEN_HOME}\\bin\\mvn.cmd\" clean compile -DskipTests"
             }
         }
 
         stage('Unit Tests') {
             steps {
                 echo "Executando testes..."
-                bat '"%MAVEN_HOME%\\bin\\mvn.cmd" test'
+               	bat "cd meuprojeto && \"${MAVEN_HOME}\\bin\\mvn.cmd\" test"
             }
         }
 
         stage('Code Analysis') {
             steps {
-                bat '"%MAVEN_HOME%\\bin\\mvn.cmd" pmd:pmd pmd:cpd'
+                bat "cd meuprojeto && \"${MAVEN_HOME}\\bin\\mvn.cmd\" pmd:pmd pmd:cpd"
             }
         }
 
         stage('Code Coverage') {
             steps {
-                bat '"%MAVEN_HOME%\\bin\\mvn.cmd" jacoco:report'
+                bat "cd meuprojeto && \"${MAVEN_HOME}\\bin\\mvn.cmd\" jacoco:report"
             }
         }
 
         stage('Package') {
             steps {
-                bat '"%MAVEN_HOME%\\bin\\mvn.cmd" package -DskipTests'
+                bat "cd meuprojeto && \"${MAVEN_HOME}\\bin\\mvn.cmd\" package -DskipTests"
             }
         }
 
