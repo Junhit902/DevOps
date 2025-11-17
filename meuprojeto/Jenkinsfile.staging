@@ -1,89 +1,75 @@
 pipeline {
+
     agent any
 
     environment {
-        MAVEN_HOME = '/usr/batare/maven'
-        JAVA_HOME = '/usr/lib/jvm/java-17-openjdk'
-        PROJECT_NAME = 'meuprojeto'
-    }
-
-    options {
-        timestamps()
-        timeout(time: 30, unit: 'MINUTES')
-        buildDiscarder(logRotator(numToKeepStr: '10'))
+        MAVEN_HOME = "C:\\Program Files\\apache-maven-3.9.6"
+        JAVA_HOME = "C:\\Program Files\\Java\\jdk-17"
+        PATH = "${JAVA_HOME}\\bin;${MAVEN_HOME}\\bin;${env.PATH}"
     }
 
     stages {
+
         stage('Checkout') {
             steps {
-                echo 'Fazendo checkout do código...'
+                echo "Fazendo checkout do código..."
                 checkout scm
             }
         }
 
         stage('Build') {
             steps {
-                echo 'Compilando o projeto...'
-                bat 'mvn clean compile -DskipTests'
+                echo "Compilando o projeto..."
+                bat '"%MAVEN_HOME%\\bin\\mvn.cmd" clean compile -DskipTests'
             }
         }
 
         stage('Unit Tests') {
             steps {
-                echo 'Executando testes unitários...'
-                bat 'mvn test'
+                echo "Executando testes..."
+                bat '"%MAVEN_HOME%\\bin\\mvn.cmd" test'
             }
         }
 
         stage('Code Analysis') {
             steps {
-                echo 'Executando análise de código com PMD...'
-                bat 'mvn pmd:pmd pmd:cpd'
+                bat '"%MAVEN_HOME%\\bin\\mvn.cmd" pmd:pmd pmd:cpd'
             }
         }
 
         stage('Code Coverage') {
             steps {
-                echo 'Gerando relatório de cobertura de código...'
-                bat 'mvn jacoco:report'
+                bat '"%MAVEN_HOME%\\bin\\mvn.cmd" jacoco:report'
             }
         }
 
         stage('Package') {
             steps {
-                echo 'Empacotando a aplicação...'
-                bat 'mvn package -DskipTests'
+                bat '"%MAVEN_HOME%\\bin\\mvn.cmd" package -DskipTests'
             }
         }
 
-        stage('Deploy to Staging') {
-            when {
-                branch 'develop'
-            }
+        stage('Start container') {
             steps {
-                echo 'Fazendo deploy para o ambiente de staging...'
-                // Adicione aqui os comandos de deploy para staging
-                // Exemplo: bat './deploy-staging.bat'
-                echo 'Deploy para staging concluído com sucesso!'
+                echo "Iniciando container..."
+                bat 'docker-compose -f docker-compose.staging.yml pull'
+                bat 'docker-compose -f docker-compose.staging.yml up -d'
+                sleep time: 60, unit: 'SECONDS'
+                bat 'docker-compose -f docker-compose.staging.yml logs'
+                bat 'docker-compose -f docker-compose.staging.yml ps'
+            }
+        }
+
+        stage('Run tests against container') {
+            steps {
+                bat 'curl http://localhost:8686 || echo "Serviço não respondeu"'
             }
         }
     }
 
     post {
         always {
-            echo 'Limpando workspace...'
-            cleanWs()
-        }
-        success {
-            echo 'Pipeline executado com sucesso!'
-            // Adicione aqui notificações de sucesso (email, Slack, etc)
-        }
-        failure {
-            echo 'Pipeline falhou!'
-            // Adicione aqui notificações de falha (email, Slack, etc)
-        }
-        unstable {
-            echo 'Pipeline executado com avisos!'
+            echo "Pipeline finalizado"
         }
     }
 }
