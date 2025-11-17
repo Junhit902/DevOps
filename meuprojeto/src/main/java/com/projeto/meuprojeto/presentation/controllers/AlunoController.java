@@ -7,10 +7,10 @@ import com.projeto.meuprojeto.application.usecases.SolicitarDescontoUseCase;
 import com.projeto.meuprojeto.domain.entities.Aluno;
 import com.projeto.meuprojeto.domain.repositories.AlunoRepository;
 import com.projeto.meuprojeto.infrastructure.config.BeanConfiguration;
+import org.springframework.web.bind.annotation.*;
 
-/**
- * Controlador para gerenciar operações relacionadas a alunos
- */
+@RestController
+@RequestMapping("/alunos")
 public class AlunoController {
 
     private final AlunoRepository alunoRepository;
@@ -21,36 +21,40 @@ public class AlunoController {
         this.solicitarDescontoUseCase = new SolicitarDescontoUseCase();
     }
 
-    /**
-     * Cria um novo aluno
-     */
-    public Aluno criarAluno(AlunoInputDTO dto) {
+    @PostMapping
+    public Aluno criarAluno(@RequestBody AlunoInputDTO dto) {
         Aluno aluno = AlunoMapper.toDomain(dto);
         alunoRepository.salvar(aluno);
         return aluno;
     }
 
-    /**
-     * Obtém o desconto de um aluno
-     */
-    public double obterDesconto(String nomeAluno, int cursosConcluidos, double mediaGlobal) {
-        Aluno aluno = new Aluno(nomeAluno, cursosConcluidos, mediaGlobal);
+    @GetMapping("/desconto")
+    public double obterDesconto(
+            @RequestParam String nome,
+            @RequestParam int cursos,
+            @RequestParam double media
+    ) {
+        Aluno aluno = new Aluno(nome, cursos, media);
         return solicitarDescontoUseCase.executar(aluno);
     }
 
-    /**
-     * Obtém a mensagem de desconto de um aluno
-     */
-    public String obterMensagemDesconto(String nomeAluno, int cursosConcluidos, double mediaGlobal) {
-        Aluno aluno = new Aluno(nomeAluno, cursosConcluidos, mediaGlobal);
+    @GetMapping("/mensagem")
+    public String obterMensagemDesconto(
+            @RequestParam String nome,
+            @RequestParam int cursos,
+            @RequestParam double media
+    ) {
+        Aluno aluno = new Aluno(nome, cursos, media);
         return solicitarDescontoUseCase.executarComMensagem(aluno);
     }
 
-    /**
-     * Obtém os detalhes do desconto de um aluno
-     */
-    public DescontoOutputDTO obterDetalhesDesconto(String nomeAluno, int cursosConcluidos, double mediaGlobal) {
-        Aluno aluno = new Aluno(nomeAluno, cursosConcluidos, mediaGlobal);
+    @GetMapping("/detalhes")
+    public DescontoOutputDTO obterDetalhesDesconto(
+            @RequestParam String nome,
+            @RequestParam int cursos,
+            @RequestParam double media
+    ) {
+        Aluno aluno = new Aluno(nome, cursos, media);
         return solicitarDescontoUseCase.executarComDetalhes(aluno);
     }
 }

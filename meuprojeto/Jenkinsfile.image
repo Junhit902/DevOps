@@ -2,7 +2,6 @@ pipeline {
     agent any
 
     environment {
-        // Ajuste o nome do repositório conforme seu usuário do Docker Hub
         DOCKERHUB_REPO = 'thiagojun09/dev_ops_ac2'
         IMAGE_TAG = 'latest'
     }
